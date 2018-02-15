@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Adds a permission that controls whether a user is allowed to publish content.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function publish_content_permission_permission() {
+  return array(
+    'publish content' => array(
+      'title' => t('Can publish content.'),
+      'description' => t('If enabled, the user is allowed to publish content.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Disables and hides the submit button if permissions are insufficient for
+ * publishing.
+ */
+function publish_content_permission_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['#node_edit_form']) && $form['#node_edit_form']) {
+    if (!user_access('publish content')) {
+      if (isset($form['actions']['submit'])) {
+        $form['actions']['submit']['#disabled'] = TRUE;
+        $form['actions']['submit']['#access'] = FALSE;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ *
+ * This is a failsafe if for some reason a user is able to submit a form
+ * for publishing, the status of the node is set according to the user's
+ * permissions.
+ */
+function publish_content_permission_node_presave($node) {
+  if (!user_access('publish content')) {
+    $node->status = FALSE;
+  }
+}

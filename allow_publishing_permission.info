@@ -1,3 +1,0 @@
-name = Allow Publishing Permission
-description = Adds a permission that controls whether a user is allowed to publish content or to only store drafts.
-core = 7.x
