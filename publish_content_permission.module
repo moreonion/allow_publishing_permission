@@ -46,3 +46,18 @@ function publish_content_permission_node_presave($node) {
     $node->status = FALSE;
   }
 }
+
+/**
+ * Implements hook_node_access().
+ *
+ * This prevents users who don't have publishing permission from editing
+ * published content. This is needed as it would otherwise be possible to
+ * unpublish content.
+ */
+function publish_content_permission_node_access($node, $op, $account) {
+  if ($op == 'update'
+      && !user_access('publish content', $account)
+      && $node->status == TRUE) {
+    return NODE_ACCESS_DENY;
+  }
+}
