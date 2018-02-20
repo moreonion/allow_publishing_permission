@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Adds a permission that controls whether a user is allowed to publish content.
+ * A permission that controls if a user is allowed to change publishing status.
  */
 
 /**
  * Implements hook_permission().
  */
-function publish_content_permission_permission() {
+function change_publishing_status_permission_permission() {
   return array(
-    'publish content' => array(
-      'title' => t('Can publish content.'),
-      'description' => t('If enabled, the user is allowed to publish content.'),
+    'change publishing status' => array(
+      'title' => t('Change publishing status.'),
+      'description' => t('If enabled, the user is allowed to change the publishing status of nodes.'),
     ),
   );
 }
@@ -23,9 +23,9 @@ function publish_content_permission_permission() {
  * Disables and hides the submit button if permissions are insufficient for
  * publishing.
  */
-function publish_content_permission_form_alter(&$form, &$form_state, $form_id) {
+function change_publishing_status_permission_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node_edit_form']) && $form['#node_edit_form']) {
-    if (!user_access('publish content')) {
+    if (!user_access('change publishing status')) {
       if (isset($form['actions']['submit'])) {
         $form['actions']['submit']['#disabled'] = TRUE;
         $form['actions']['submit']['#access'] = FALSE;
@@ -41,8 +41,8 @@ function publish_content_permission_form_alter(&$form, &$form_state, $form_id) {
  * for publishing, the status of the node is set according to the user's
  * permissions.
  */
-function publish_content_permission_node_presave($node) {
-  if (!user_access('publish content')) {
+function change_publishing_status_permission_node_presave($node) {
+  if (!user_access('change publishing status')) {
     $node->status = FALSE;
   }
 }
@@ -54,9 +54,9 @@ function publish_content_permission_node_presave($node) {
  * published content. This is needed as it would otherwise be possible to
  * unpublish content.
  */
-function publish_content_permission_node_access($node, $op, $account) {
+function change_publishing_status_permission_node_access($node, $op, $account) {
   if ($op == 'update'
-      && !user_access('publish content', $account)
+      && !user_access('change publishing status', $account)
       && $node->status == TRUE) {
     return NODE_ACCESS_DENY;
   }

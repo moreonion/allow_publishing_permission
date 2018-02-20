@@ -1,5 +1,0 @@
-name = Publish Content Permission
-description = Adds a permission that controls whether a user is allowed to publish content.
-core = 7.x
-
-dependencies[] = save_draft

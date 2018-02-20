@@ -1,0 +1,5 @@
+name = Change Publishing Status Permission
+description = Adds a permission that controls whether a user is allowed to change the publishing status of nodes (i.e. publish and unpublish).
+core = 7.x
+
+dependencies[] = save_draft
