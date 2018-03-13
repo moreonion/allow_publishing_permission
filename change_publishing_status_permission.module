@@ -23,41 +23,38 @@ function change_publishing_status_permission_permission() {
  * Disables and hides the submit button if permissions are insufficient for
  * publishing.
  */
-function change_publishing_status_permission_form_alter(&$form, &$form_state, $form_id) {
-  if (isset($form['#node_edit_form']) && $form['#node_edit_form']) {
-    if (!user_access('change publishing status')) {
-      if (isset($form['actions']['submit'])) {
-        $form['actions']['submit']['#disabled'] = TRUE;
-        $form['actions']['submit']['#access'] = FALSE;
-      }
+function change_publishing_status_permission_form_node_form_alter(&$form, &$form_state, $form_id) {
+  if (!user_access('change publishing status')) {
+    $form['options']['status']['#disabled'] = TRUE;
+    if (user_access('save draft')) {
+      $form['actions']['#process'][] = 'change_publishing_status_permission_submit_access';
     }
   }
 }
 
 /**
- * Implements hook_node_presave().
- *
- * This is a failsafe if for some reason a user is able to submit a form
- * for publishing, the status of the node is set according to the user's
- * permissions.
+ * Implements hook_node_prepare().
  */
-function change_publishing_status_permission_node_presave($node) {
-  if (!user_access('change publishing status')) {
-    $node->status = FALSE;
+function change_publishing_status_permission_node_prepare($node) {
+  if (empty($node->nid) && !user_access('change publishing status')) {
+    $node->status = NODE_NOT_PUBLISHED;
   }
 }
 
 /**
- * Implements hook_node_access().
+ * Form process handler for node_form().
  *
- * This prevents users who don't have publishing permission from editing
- * published content. This is needed as it would otherwise be possible to
- * unpublish content.
+ * Remove access to submit-buttons that will change the publishing status.
+ *
+ * @see change_publishing_status_permission_form_node_form_alter()
  */
-function change_publishing_status_permission_node_access($node, $op, $account) {
-  if ($op == 'update'
-      && !user_access('change publishing status', $account)
-      && $node->status == TRUE) {
-    return NODE_ACCESS_DENY;
+function change_publishing_status_permission_submit_access(array $element, &$form_state, array $form) {
+  $node = $form_state['node'];
+  if ($node->status && isset($element['draft'])) {
+    $element['draft']['#access'] = FALSE;
   }
+  if (!$node->status && isset($element['submit'])) {
+    $element['submit']['#access'] = FALSE;
+  }
+  return $element;
 }
