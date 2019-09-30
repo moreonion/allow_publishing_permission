@@ -14,6 +14,14 @@ function change_publishing_status_permission_permission() {
       'title' => t('Change publishing status.'),
       'description' => t('If enabled, the user is allowed to change the publishing status of nodes.'),
     ),
+    'update published nodes' => array(
+      'title' => t('Edit published nodes.'),
+      'description' => t('Expand the user’s node edit permissions to published nodes.'),
+    ),
+    'delete published nodes' => array(
+      'title' => t('Delete published nodes.'),
+      'description' => t('Expand the user’s node delete permissions to published nodes.'),
+    ),
   );
 }
 
@@ -30,6 +38,20 @@ function change_publishing_status_permission_form_node_form_alter(&$form, &$form
       $form['actions']['#process'][] = 'change_publishing_status_permission_submit_access';
     }
   }
+}
+
+/**
+ * Implements hook_node_access().
+ *
+ * Restricts editing and deleting of published nodes.
+ */
+function change_publishing_status_permission_node_access($node, $op, $account) {
+  $restricted_op = in_array($op, ['update', 'delete']);
+  $published = is_object($node) && $node->status;
+  if ($published && $restricted_op && !user_access("$op published nodes", $account)) {
+    return NODE_ACCESS_DENY;
+  }
+  return NODE_ACCESS_IGNORE;
 }
 
 /**
